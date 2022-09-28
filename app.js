@@ -6,7 +6,8 @@ const Campground = require("./models/campground");
 const ejsMate = require("ejs-mate");
 const ExpressError = require("./utils/ExpressError");
 const catchAsync = require("./utils/catchAsync");
-
+const Joi = require("joi");
+const { campgroundSchema } = require("./schemas");
 mongoose.connect("mongodb://localhost:27017/yelpCamp", {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -25,6 +26,17 @@ app.set("views", path.join(__dirname, "views"));
 
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
+
+// JOI middleware
+const validateCampground = (req, res, next) => {
+  const { error } = campgroundSchema.validate(req.body);
+  if (error) {
+    const msg = error.details.map((el) => el.message).join(",");
+    throw new ExpressError(msg, 400);
+  } else {
+    next();
+  }
+};
 
 app.get("/", (req, res) => {
   res.render("home");
@@ -45,10 +57,12 @@ app.get("/campgrounds/new", (req, res) => {
 });
 app.post(
   "/campgrounds",
+  validateCampground,
   catchAsync(async (req, res, next) => {
-    if (!req.body.campground) {
-      throw new ExpressError("Invalid Campground Data", 400);
-    }
+    // if (!req.body.campground) {
+    //   throw new ExpressError("Invalid Campground Data", 400);
+    // }
+
     const newCamp = new Campground(req.body.campground);
     await newCamp.save();
     res.redirect(`campgrounds/${newCamp._id}`);
@@ -77,6 +91,7 @@ app.get(
 
 app.put(
   "/campgrounds/:id",
+  validateCampground,
   catchAsync(async (req, res) => {
     const { id } = req.params;
     const campground = await Campground.findByIdAndUpdate(
