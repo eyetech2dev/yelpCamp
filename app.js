@@ -2,12 +2,11 @@ const express = require("express");
 const path = require("path");
 const mongoose = require("mongoose");
 const methodOverride = require("method-override");
-const Campground = require("./models/campground");
 const ejsMate = require("ejs-mate");
 const ExpressError = require("./utils/ExpressError");
 const Joi = require("joi");
-const Review = require("./models/review");
 const session = require("express-session");
+const flash = require("connect-flash");
 
 const campgrounds = require("./routes/campgrounds");
 const reviews = require("./routes/reviews");
@@ -46,6 +45,15 @@ const sessionConfig = {
   },
 };
 app.use(session(sessionConfig));
+
+// Connect-flash
+app.use(flash());
+// Flash middleware to apply it to all routes
+app.use((req, res, next) => {
+  res.locals.success = req.flash("success");
+  res.locals.error = req.flash("error");
+  next();
+});
 
 // Express router
 app.use("/campgrounds", campgrounds);
