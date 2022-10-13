@@ -7,6 +7,7 @@ const ejsMate = require("ejs-mate");
 const ExpressError = require("./utils/ExpressError");
 const Joi = require("joi");
 const Review = require("./models/review");
+const session = require("express-session");
 
 const campgrounds = require("./routes/campgrounds");
 const reviews = require("./routes/reviews");
