@@ -7,6 +7,9 @@ const ExpressError = require("./utils/ExpressError");
 const Joi = require("joi");
 const session = require("express-session");
 const flash = require("connect-flash");
+const passport = require("passport");
+const LocalStrategy = require("passport-local");
+const User = require("./models/user");
 
 const campgrounds = require("./routes/campgrounds");
 const reviews = require("./routes/reviews");
@@ -48,11 +51,26 @@ app.use(session(sessionConfig));
 
 // Connect-flash
 app.use(flash());
+
+// Passport
+app.use(passport.initialize());
+app.use(passport.session());
+// Passport local
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
 // Flash middleware to apply it to all routes
 app.use((req, res, next) => {
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
   next();
+});
+
+app.get("/fakeUser", async (req, res) => {
+  const user = new User({ email: "colt@gmail.com", username: "colt" });
+  const newUser = await User.register(user, "chicken");
+  res.send(newUser);
 });
 
 // Express router
