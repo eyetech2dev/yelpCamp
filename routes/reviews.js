@@ -5,6 +5,7 @@ const ExpressError = require("../utils/ExpressError");
 const { reviewSchema } = require("../schemas");
 const Review = require("../models/review");
 const Campground = require("../models/campground");
+const { isLoggedIn } = require("../middleware");
 
 // Validate Reviews Middleware
 const validateReview = (req, res, next) => {
@@ -20,6 +21,7 @@ const validateReview = (req, res, next) => {
 // Reviews POST
 router.post(
   "/",
+  isLoggedIn,
   validateReview,
   catchAsync(async (req, res) => {
     const campground = await Campground.findById(req.params.id);

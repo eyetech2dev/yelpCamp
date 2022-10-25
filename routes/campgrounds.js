@@ -4,6 +4,7 @@ const catchAsync = require("../utils/catchAsync");
 const ExpressError = require("../utils/ExpressError");
 const Campground = require("../models/campground");
 const { campgroundSchema } = require("../schemas");
+const { isLoggedIn } = require("../middleware");
 
 // JOI middleware
 const validateCampground = (req, res, next) => {
@@ -26,11 +27,12 @@ router.get(
 );
 
 // New camp entry and POST
-router.get("/new", (req, res) => {
+router.get("/new", isLoggedIn, (req, res) => {
   res.render("campgrounds/new");
 });
 router.post(
   "/",
+  isLoggedIn,
   validateCampground,
   catchAsync(async (req, res, next) => {
     // if (!req.body.campground) {
